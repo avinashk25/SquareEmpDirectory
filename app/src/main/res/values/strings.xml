@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SquareEmpDirectory</string>
+    <string name="part_time_employee">Part Time Employee</string>
+    <string name="contractor_employee">Contractor Employee</string>
+    <string name="full_time_employee">Full Time Employee</string>
+    <string name="no_data_display">No data to display</string>
+</resources>
