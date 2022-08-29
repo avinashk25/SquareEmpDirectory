@@ -1,38 +1,3 @@
-Index: app/src/main/AndroidManifest.xml
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
---- a/app/src/main/AndroidManifest.xml	
-+++ b/app/src/main/AndroidManifest.xml	
-@@ -3,8 +3,6 @@
-     xmlns:tools="http://schemas.android.com/tools"
-     package="com.project.squareempdirectory">
- 
--    <uses-permission android:name="android.permission.INTERNET" />
--
-     <application
-         android:name="com.project.squareempdirectory.BaseApplication"
-         android:allowBackup="true"
-@@ -17,6 +15,9 @@
-         android:theme="@style/Theme.SquareEmpDirectory"
-         tools:targetApi="31">
-         <activity
-+            android:name=".EmployeeDetailsActivity"
-+            android:exported="false" />
-+        <activity
-             android:name=".MainActivity"
-             android:exported="true">
-             <intent-filter>
-@@ -27,4 +28,6 @@
-         </activity>
-     </application>
- 
-+    <uses-permission android:name="android.permission.INTERNET" />
-+
- </manifest>
-\ No newline at end of file
 Index: app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareEmployeeResponse.kt
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -41,78 +6,162 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 diff --git a/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareEmployeeResponse.kt b/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareEmployeeResponse.kt
 --- a/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareEmployeeResponse.kt	
 +++ b/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareEmployeeResponse.kt	
-@@ -3,6 +3,7 @@
+@@ -1,5 +1,8 @@
+ package com.project.squareempdirectory.retrofit.model
+ 
++import androidx.room.ColumnInfo
++import androidx.room.Entity
++import androidx.room.PrimaryKey
  import com.google.gson.annotations.SerializedName
  import com.project.squareempdirectory.BaseApplication
  import com.project.squareempdirectory.R
-+import java.io.Serializable
+@@ -16,33 +19,43 @@
+  * Individual Employee information to be displayed.
+  */
  
- /**
-  * Endpoint response is received as list of employees.
-@@ -44,7 +45,7 @@
++@Entity(tableName = "employee")
+ data class EmployeesListItem(
+ 
+     @field:SerializedName("uuid")
++    @PrimaryKey @ColumnInfo(name = "uuid")
+     val uuid: String,
+ 
+     @field:SerializedName("full_name")
++    @ColumnInfo(name = "fullName")
+     val fullName: String,
+ 
+     @field:SerializedName("phone_number")
++    @ColumnInfo(name = "phoneNumber")
+     val phoneNumber: String,
+ 
+     @field:SerializedName("email_address")
++    @ColumnInfo(name = "emailAddress")
+     val emailAddress: String,
+ 
+     @field:SerializedName("employee_type")
++    @ColumnInfo(name = "employeeType")
+     val employeeType: String,
+ 
+     @field:SerializedName("biography")
++    @ColumnInfo(name = "biography")
+     val biography: String,
+ 
+     @field:SerializedName("team")
++    @ColumnInfo(name = "team")
+     val team: String,
+ 
+     @field:SerializedName("photo_url_large")
++    @ColumnInfo(name = "photoUrlLarge")
+     val photoUrlLarge: String,
  
      @field:SerializedName("photo_url_small")
++    @ColumnInfo(name = "photoUrlSmall")
      val photoUrlSmall: String,
--)
-+) : Serializable
+ )
  
- /**
-  * Enum class to display type of employment.
-Index: app/src/main/java/com/project/squareempdirectory/ui/EmployeeListFragment.kt
+Index: app/build.gradle
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListFragment.kt b/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListFragment.kt
---- a/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListFragment.kt	
-+++ b/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListFragment.kt	
-@@ -1,11 +1,13 @@
- package com.project.squareempdirectory.ui
+diff --git a/app/build.gradle b/app/build.gradle
+--- a/app/build.gradle	
++++ b/app/build.gradle	
+@@ -48,6 +48,8 @@
+     implementation 'androidx.appcompat:appcompat:1.4.2'
+     implementation 'com.google.android.material:material:1.6.1'
+     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
++    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
++    implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
+     testImplementation 'junit:junit:4.13.2'
+     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+@@ -78,6 +80,17 @@
+     implementation "com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}"
+     implementation "com.squareup.okhttp3:logging-interceptor:${okhttpVersion}"
  
-+import android.content.Intent
- import android.os.Bundle
- import android.view.LayoutInflater
- import android.view.View
- import android.view.ViewGroup
- import androidx.fragment.app.Fragment
- import androidx.fragment.app.viewModels
-+import com.project.squareempdirectory.EmployeeDetailsActivity
- import com.project.squareempdirectory.databinding.EmployeeListFragmentBinding
++    def room_version = "2.4.3"
++
++    implementation("androidx.room:room-runtime:$room_version")
++    annotationProcessor("androidx.room:room-compiler:$room_version")
++    // To use Kotlin annotation processing tool (kapt)
++    kapt("androidx.room:room-compiler:$room_version")
++    // optional - Kotlin Extensions and Coroutines support for Room
++    implementation("androidx.room:room-ktx:$room_version")
++    // optional - RxJava2 support for Room
++    implementation("androidx.room:room-rxjava2:$room_version")
++
+     implementation "com.google.dagger:hilt-android:2.42"
+     kapt "com.google.dagger:hilt-compiler:2.42"
+ 
+@@ -95,6 +108,8 @@
+     testImplementation "androidx.test:runner:1.4.0"
+     testImplementation "androidx.test:core-ktx:1.4.0"
+     testImplementation "androidx.test:rules:1.4.0"
++    // optional - Test helpers
++    testImplementation("androidx.room:room-testing:$room_version")
+ 
+     testImplementation("com.google.dagger:hilt-android-testing:2.35")
+     kaptTest("com.google.dagger:hilt-android-compiler:2.42")
+Index: app/src/test/java/com/project/squareempdirectory/EmployeeListViewModelUnitTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/test/java/com/project/squareempdirectory/EmployeeListViewModelUnitTest.kt b/app/src/test/java/com/project/squareempdirectory/EmployeeListViewModelUnitTest.kt
+--- a/app/src/test/java/com/project/squareempdirectory/EmployeeListViewModelUnitTest.kt	
++++ b/app/src/test/java/com/project/squareempdirectory/EmployeeListViewModelUnitTest.kt	
+@@ -1,6 +1,7 @@
+ package com.project.squareempdirectory
+ 
+ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
++import com.project.squareempdirectory.database.repository.EmployeeRepository
  import com.project.squareempdirectory.retrofit.model.EmployeesListItem
- import com.project.squareempdirectory.viewmodel.EmployeeListViewModel
-@@ -18,6 +20,10 @@
- @AndroidEntryPoint
- class EmployeeListFragment : Fragment() {
+ import com.project.squareempdirectory.retrofit.model.SquareEmployeeResponse
+ import com.project.squareempdirectory.retrofit.model.SquareEmployeeService
+@@ -32,12 +33,15 @@
+     @RelaxedMockK
+     lateinit var service: SquareEmployeeService
  
-+    companion object {
-+        const val employeeObject = "employee_details"
-+    }
++    @RelaxedMockK
++    lateinit var repository: EmployeeRepository
 +
-     private lateinit var binding: EmployeeListFragmentBinding
-     private val viewModel : EmployeeListViewModel by viewModels()
+     private lateinit var viewModel: EmployeeListViewModel
  
-@@ -32,6 +38,7 @@
-         binding.viewModel = viewModel
-         viewModel.items.observe(viewLifecycleOwner, ::onEmployeeListItemLoaded)
-         viewModel.isEmpty.observe(viewLifecycleOwner, ::updateEmptyListState)
-+        viewModel.itemClick.observe(viewLifecycleOwner, ::onEmployeeItemClick)
-         return binding.root
+     @Before
+     fun setUp() {
+         MockKAnnotations.init(this, relaxed = true, relaxUnitFun = true)
+-        viewModel = EmployeeListViewModel(service)
++        viewModel = EmployeeListViewModel(service, repository)
      }
  
-@@ -53,4 +60,12 @@
-             binding.isEmpty = isListEmpty
-         }
-     }
-+
-+    private fun onEmployeeItemClick(employeesListItem: EmployeesListItem) {
-+        val intent = Intent(context, EmployeeDetailsActivity::class.java)
-+        val bundle = Bundle()
-+        bundle.putSerializable(employeeObject, employeesListItem)
-+        intent.putExtras(bundle)
-+        startActivity(intent)
-+    }
- }
-\ No newline at end of file
+     @After
+Index: app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareAPIService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareAPIService.kt b/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareAPIService.kt
+--- a/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareAPIService.kt	
++++ b/app/src/main/java/com/project/squareempdirectory/retrofit/model/SquareAPIService.kt	
+@@ -5,7 +5,7 @@
+ import dagger.Module
+ import dagger.Provides
+ import dagger.hilt.InstallIn
+-import dagger.hilt.android.components.ViewModelComponent
++import dagger.hilt.components.SingletonComponent
+ import okhttp3.OkHttpClient
+ import retrofit2.Retrofit
+ import retrofit2.converter.gson.GsonConverterFactory
+@@ -15,7 +15,7 @@
+  * Provides retrofit client instance to consume http APIs.
+  */
+ 
+-@InstallIn(ViewModelComponent::class)
++@InstallIn(SingletonComponent::class)
+ @Module
+ class SquareAPIService {
+ 
 Index: .idea/compiler.xml
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -130,126 +179,96 @@ diff --git a/.idea/compiler.xml b/.idea/compiler.xml
    </component>
  </project>
 \ No newline at end of file
-Index: app/src/main/java/com/project/squareempdirectory/ui/EmployeeListAdapter.kt
+Index: app/src/main/java/com/project/squareempdirectory/database/repository/EmployeeRepository.kt
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListAdapter.kt b/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListAdapter.kt
---- a/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListAdapter.kt	
-+++ b/app/src/main/java/com/project/squareempdirectory/ui/EmployeeListAdapter.kt	
-@@ -12,7 +12,7 @@
-  * A RecyclerView.Adapter populating the screen with a list of employees fetched through viewModel using retrofit Http API.
-  */
- 
--class EmployeeListAdapter(var items: List<EmployeesListItem> = emptyList()) : RecyclerView.Adapter<EmployeeListViewHolder>(){
-+class EmployeeListAdapter(var items: List<EmployeesListItem> = emptyList(), val adapterOnClick : (EmployeesListItem) -> Unit) : RecyclerView.Adapter<EmployeeListViewHolder>(){
- 
-     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmployeeListViewHolder {
-         val binding = EmployeeListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-@@ -21,6 +21,7 @@
- 
-     override fun onBindViewHolder(holder: EmployeeListViewHolder, position: Int) {
-         holder.binding.employeeDetails = items.elementAtOrNull(position)
-+        holder.binding.cardView.setOnClickListener { adapterOnClick(items.elementAt(position)) }
-     }
- 
-     override fun getItemCount(): Int {
-Index: app/src/main/java/com/project/squareempdirectory/ui/EmployeeDataBinding.kt
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/app/src/main/java/com/project/squareempdirectory/ui/EmployeeDataBinding.kt b/app/src/main/java/com/project/squareempdirectory/ui/EmployeeDataBinding.kt
---- a/app/src/main/java/com/project/squareempdirectory/ui/EmployeeDataBinding.kt	
-+++ b/app/src/main/java/com/project/squareempdirectory/ui/EmployeeDataBinding.kt	
-@@ -12,10 +12,10 @@
-  * Binding methods added to update UI items from layout files.
-  */
- 
--@BindingAdapter("items")
--fun RecyclerView.addItems(items : List<EmployeesListItem>?) {
-+@BindingAdapter("items" , "adapterOnClick")
-+fun RecyclerView.addItems(items : List<EmployeesListItem>?, adapterOnClick : (EmployeesListItem) -> Unit) {
-     if (adapter == null) {
--        val fragmentListAdapter = EmployeeListAdapter(items ?: emptyList())
-+        val fragmentListAdapter = EmployeeListAdapter(items ?: emptyList(), adapterOnClick)
-         adapter = fragmentListAdapter
-         addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-     } else {
-Index: app/src/main/java/com/project/squareempdirectory/EmployeeDetailsActivity.kt
-===================================================================
-diff --git a/app/src/main/java/com/project/squareempdirectory/EmployeeDetailsActivity.kt b/app/src/main/java/com/project/squareempdirectory/EmployeeDetailsActivity.kt
+diff --git a/app/src/main/java/com/project/squareempdirectory/database/repository/EmployeeRepository.kt b/app/src/main/java/com/project/squareempdirectory/database/repository/EmployeeRepository.kt
 new file mode 100644
 --- /dev/null	
-+++ b/app/src/main/java/com/project/squareempdirectory/EmployeeDetailsActivity.kt	
-@@ -0,0 +1,28 @@
-+package com.project.squareempdirectory
++++ b/app/src/main/java/com/project/squareempdirectory/database/repository/EmployeeRepository.kt	
+@@ -0,0 +1,35 @@
++package com.project.squareempdirectory.database.repository
 +
-+import androidx.appcompat.app.AppCompatActivity
-+import android.os.Bundle
-+import androidx.databinding.DataBindingUtil
-+import com.project.squareempdirectory.databinding.ActivityEmployeeDetailsBinding
-+import com.project.squareempdirectory.ui.EmployeeDetailsFragment
-+import dagger.hilt.android.AndroidEntryPoint
++import androidx.annotation.WorkerThread
++import com.project.squareempdirectory.database.dao.EmployeeDao
++import com.project.squareempdirectory.retrofit.model.EmployeesListItem
++import com.project.squareempdirectory.retrofit.model.SquareEmployeeService
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.count
++import kotlinx.coroutines.flow.first
++import javax.inject.Inject
++import javax.inject.Singleton
 +
-+@AndroidEntryPoint
-+class EmployeeDetailsActivity : AppCompatActivity() {
++@Singleton
++class EmployeeRepository @Inject constructor(private val service: SquareEmployeeService, private val employeeDao: EmployeeDao) {
 +
-+    private lateinit var binding : ActivityEmployeeDetailsBinding
-+    override fun onCreate(savedInstanceState: Bundle?) {
-+        super.onCreate(savedInstanceState)
-+        binding = DataBindingUtil.setContentView(this, R.layout.activity_employee_details)
-+        binding.lifecycleOwner = this
-+        val extras = intent.extras
++    val employeeList: Flow<List<EmployeesListItem>> = employeeDao.getEmployeeList()
 +
-+        val bundle = Bundle().apply {
-+            putSerializable(EmployeeDetailsFragment.employeeObject, extras?.getSerializable(EmployeeDetailsFragment.employeeObject))
++    @WorkerThread
++    suspend fun insert(employeeEntity: EmployeesListItem) {
++        employeeDao.insert(employeeEntity)
++    }
++
++    suspend fun getEmployeesList() : List<EmployeesListItem> {
++        var list : List<EmployeesListItem> = emptyList()
++        //if (employeeList.first().isEmpty()) {
++            list = service.getEmployeesList().employeesList.sortedBy { it.fullName.lowercase() }
++        //}
++        if (list.isNotEmpty()) {
++            for (items in list) {
++                insert(items)
++            }
 +        }
-+
-+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container,
-+            EmployeeDetailsFragment::class.java, bundle
-+        ).commitNow()
++        return list
 +    }
 +}
 \ No newline at end of file
-Index: app/src/main/res/layout/employee_list_fragment.xml
+Index: app/src/main/java/com/project/squareempdirectory/database/db/EmployeeRoomDatabase.kt
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/app/src/main/res/layout/employee_list_fragment.xml b/app/src/main/res/layout/employee_list_fragment.xml
---- a/app/src/main/res/layout/employee_list_fragment.xml	
-+++ b/app/src/main/res/layout/employee_list_fragment.xml	
-@@ -38,6 +38,7 @@
-                 android:layout_height="match_parent"
-                 android:orientation="vertical"
-                 app:items="@{viewModel.items}"
-+                app:adapterOnClick="@{viewModel.adapterOnClick}"
-                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                 tools:listitem="@layout/employee_list_item" />
- 
-Index: app/src/main/res/layout/activity_employee_details.xml
-===================================================================
-diff --git a/app/src/main/res/layout/activity_employee_details.xml b/app/src/main/res/layout/activity_employee_details.xml
+diff --git a/app/src/main/java/com/project/squareempdirectory/database/db/EmployeeRoomDatabase.kt b/app/src/main/java/com/project/squareempdirectory/database/db/EmployeeRoomDatabase.kt
 new file mode 100644
 --- /dev/null	
-+++ b/app/src/main/res/layout/activity_employee_details.xml	
-@@ -0,0 +1,14 @@
-+<?xml version="1.0" encoding="utf-8"?>
-+<layout xmlns:android="http://schemas.android.com/apk/res/android">
++++ b/app/src/main/java/com/project/squareempdirectory/database/db/EmployeeRoomDatabase.kt	
+@@ -0,0 +1,34 @@
++package com.project.squareempdirectory.database.db
 +
-+    <merge
-+        android:id="@+id/container"
-+        android:layout_width="match_parent"
-+        android:layout_height="match_parent">
++import android.content.Context
++import androidx.room.Database
++import androidx.room.Room
++import androidx.room.RoomDatabase
++import com.project.squareempdirectory.database.dao.EmployeeDao
++import com.project.squareempdirectory.retrofit.model.EmployeesListItem
 +
-+        <FrameLayout
-+            android:id="@+id/fragment_container"
-+            android:layout_width="match_parent"
-+            android:layout_height="match_parent"/>
-+    </merge>
-+</layout>
++@Database(entities = [EmployeesListItem::class], version = 1)
++abstract class EmployeeRoomDatabase : RoomDatabase() {
++
++    abstract fun employeeDao():EmployeeDao
++
++    companion object {
++
++        @Volatile
++        private var INSTANCE : EmployeeRoomDatabase? = null
++
++        fun getDatabase( context: Context) : EmployeeRoomDatabase {
++            return INSTANCE ?: synchronized(this) {
++                val instance = Room.databaseBuilder(
++                    context.applicationContext,
++                    EmployeeRoomDatabase::class.java,
++                    "employee_database"
++                )
++                    .fallbackToDestructiveMigration()
++                    .build()
++                INSTANCE = instance
++                instance
++            }
++        }
++    }
++}
 \ No newline at end of file
 Index: app/src/main/java/com/project/squareempdirectory/viewmodel/EmployeeListViewModel.kt
 IDEA additional info:
@@ -259,22 +278,110 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 diff --git a/app/src/main/java/com/project/squareempdirectory/viewmodel/EmployeeListViewModel.kt b/app/src/main/java/com/project/squareempdirectory/viewmodel/EmployeeListViewModel.kt
 --- a/app/src/main/java/com/project/squareempdirectory/viewmodel/EmployeeListViewModel.kt	
 +++ b/app/src/main/java/com/project/squareempdirectory/viewmodel/EmployeeListViewModel.kt	
-@@ -32,6 +32,9 @@
+@@ -1,12 +1,9 @@
+ package com.project.squareempdirectory.viewmodel
+ 
+-import androidx.lifecycle.LiveData
+-import androidx.lifecycle.MutableLiveData
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++import androidx.lifecycle.*
+ import com.project.squareempdirectory.SingleLiveEvent
++import com.project.squareempdirectory.database.repository.EmployeeRepository
+ import com.project.squareempdirectory.retrofit.model.EmployeesListItem
+-import com.project.squareempdirectory.retrofit.model.SquareEmployeeService
+ import dagger.hilt.android.lifecycle.HiltViewModel
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+@@ -18,7 +15,7 @@
+  */
+ 
+ @HiltViewModel
+-class EmployeeListViewModel @Inject constructor(private val service: SquareEmployeeService) : ViewModel() {
++class EmployeeListViewModel @Inject constructor(private val repository: EmployeeRepository) : ViewModel() {
+ 
+     // LiveData variable to track list of schools to be displayed on UI
+     private val _items = MutableLiveData<List<EmployeesListItem>>()
+@@ -32,6 +29,8 @@
      private val _isRefreshing = SingleLiveEvent<Boolean>()
      val isRefreshing: LiveData<Boolean> = _isRefreshing
  
-+    private val _itemClick = MutableLiveData<EmployeesListItem>()
-+    val itemClick : LiveData<EmployeesListItem> = _itemClick
++    val employeeList: LiveData<List<EmployeesListItem?>> = repository.employeeList.asLiveData()
 +
      init {
          loadEmployeeList()
      }
-@@ -55,4 +58,7 @@
-             _isRefreshing.postValue(false)
-         }
-     }
+@@ -43,7 +42,7 @@
+     fun loadEmployeeList() {
+         viewModelScope.launch(Dispatchers.IO ) {
+             kotlin.runCatching {
+-                service.getEmployeesList().employeesList.sortedBy { it.fullName.lowercase() }
++                repository.getEmployeesList()
+                 //service.getEmptyEmployeesList().employeesList
+                 //service.getMalformedEmployeesList().employeesList
+             }.onFailure {
+Index: app/src/main/java/com/project/squareempdirectory/database/dao/EmployeeDao.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/project/squareempdirectory/database/dao/EmployeeDao.kt b/app/src/main/java/com/project/squareempdirectory/database/dao/EmployeeDao.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/project/squareempdirectory/database/dao/EmployeeDao.kt	
+@@ -0,0 +1,23 @@
++package com.project.squareempdirectory.database.dao
 +
-+    val adapterOnClick : (EmployeesListItem) -> Unit  = {
-+        _itemClick.value = it}
- }
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import com.project.squareempdirectory.retrofit.model.EmployeesListItem
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface EmployeeDao {
++
++    // The flow always holds/caches latest version of data. Notifies its observers when the
++    // data has changed.
++    @Query("SELECT * FROM employee ORDER BY uuid ASC")
++    fun getEmployeeList(): Flow<List<EmployeesListItem>>
++
++    @Insert(onConflict = OnConflictStrategy.IGNORE)
++    suspend fun insert(employee: EmployeesListItem)
++
++    @Query("DELETE FROM employee")
++    suspend fun deleteAll()
++}
+\ No newline at end of file
+Index: app/src/main/java/com/project/squareempdirectory/database/provider/DatabaseProvider.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/project/squareempdirectory/database/provider/DatabaseProvider.kt b/app/src/main/java/com/project/squareempdirectory/database/provider/DatabaseProvider.kt
+new file mode 100644
+--- /dev/null	
++++ b/app/src/main/java/com/project/squareempdirectory/database/provider/DatabaseProvider.kt	
+@@ -0,0 +1,20 @@
++package com.project.squareempdirectory.database.provider
++
++import android.content.Context
++import com.project.squareempdirectory.database.dao.EmployeeDao
++import com.project.squareempdirectory.database.db.EmployeeRoomDatabase
++import dagger.Module
++import dagger.Provides
++import dagger.hilt.InstallIn
++import dagger.hilt.android.qualifiers.ApplicationContext
++import dagger.hilt.components.SingletonComponent
++
++@InstallIn(SingletonComponent::class)
++@Module
++class DatabaseProvider {
++
++    @Provides
++    fun providesEmployeeDbDao(@ApplicationContext context: Context) : EmployeeDao {
++        return EmployeeRoomDatabase.getDatabase(context).employeeDao()
++    }
++}
 \ No newline at end of file
