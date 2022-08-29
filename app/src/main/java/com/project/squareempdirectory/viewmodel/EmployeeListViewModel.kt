@@ -1,12 +1,9 @@
 package com.project.squareempdirectory.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.project.squareempdirectory.SingleLiveEvent
+import com.project.squareempdirectory.database.repository.EmployeeRepository
 import com.project.squareempdirectory.retrofit.model.EmployeesListItem
-import com.project.squareempdirectory.retrofit.model.SquareEmployeeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +15,7 @@ import javax.inject.Inject
  */
 
 @HiltViewModel
-class EmployeeListViewModel @Inject constructor(private val service: SquareEmployeeService) : ViewModel() {
+class EmployeeListViewModel @Inject constructor(private val repository: EmployeeRepository) : ViewModel() {
 
     // LiveData variable to track list of schools to be displayed on UI
     private val _items = MutableLiveData<List<EmployeesListItem>>()
@@ -32,6 +29,8 @@ class EmployeeListViewModel @Inject constructor(private val service: SquareEmplo
     private val _isRefreshing = SingleLiveEvent<Boolean>()
     val isRefreshing: LiveData<Boolean> = _isRefreshing
 
+    val employeeList: LiveData<List<EmployeesListItem?>> = repository.employeeList.asLiveData()
+
     init {
         loadEmployeeList()
     }
@@ -43,7 +42,7 @@ class EmployeeListViewModel @Inject constructor(private val service: SquareEmplo
     fun loadEmployeeList() {
         viewModelScope.launch(Dispatchers.IO ) {
             kotlin.runCatching {
-                service.getEmployeesList().employeesList.sortedBy { it.fullName.lowercase() }
+                repository.getEmployeesList()
                 //service.getEmptyEmployeesList().employeesList
                 //service.getMalformedEmployeesList().employeesList
             }.onFailure {

@@ -1,6 +1,7 @@
 package com.project.squareempdirectory
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.project.squareempdirectory.database.repository.EmployeeRepository
 import com.project.squareempdirectory.retrofit.model.EmployeesListItem
 import com.project.squareempdirectory.retrofit.model.SquareEmployeeResponse
 import com.project.squareempdirectory.retrofit.model.SquareEmployeeService
@@ -32,12 +33,15 @@ class EmployeeListViewModelUnitTest {
     @RelaxedMockK
     lateinit var service: SquareEmployeeService
 
+    @RelaxedMockK
+    lateinit var repository: EmployeeRepository
+
     private lateinit var viewModel: EmployeeListViewModel
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true, relaxUnitFun = true)
-        viewModel = EmployeeListViewModel(service)
+        viewModel = EmployeeListViewModel(service, repository)
     }
 
     @After
