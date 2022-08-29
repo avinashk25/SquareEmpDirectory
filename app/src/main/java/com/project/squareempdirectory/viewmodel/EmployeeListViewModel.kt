@@ -32,6 +32,11 @@ class EmployeeListViewModel @Inject constructor(private val service: SquareEmplo
     private val _isRefreshing = SingleLiveEvent<Boolean>()
     val isRefreshing: LiveData<Boolean> = _isRefreshing
 
+    private val _itemClick = MutableLiveData<EmployeesListItem>()
+    val itemClick : LiveData<EmployeesListItem> = _itemClick
+
+    val employeeList: LiveData<List<EmployeesListItem?>> = repository.employeeList.asLiveData()
+
     init {
         loadEmployeeList()
     }
@@ -55,4 +60,7 @@ class EmployeeListViewModel @Inject constructor(private val service: SquareEmplo
             _isRefreshing.postValue(false)
         }
     }
+
+    val adapterOnClick : (EmployeesListItem) -> Unit  = {
+        _itemClick.value = it}
 }

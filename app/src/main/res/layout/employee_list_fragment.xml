@@ -38,6 +38,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 app:items="@{viewModel.items}"
+                app:adapterOnClick="@{viewModel.adapterOnClick}"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/employee_list_item" />
 

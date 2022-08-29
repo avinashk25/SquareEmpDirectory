@@ -3,6 +3,7 @@ package com.project.squareempdirectory.retrofit.model
 import com.google.gson.annotations.SerializedName
 import com.project.squareempdirectory.BaseApplication
 import com.project.squareempdirectory.R
+import java.io.Serializable
 
 /**
  * Endpoint response is received as list of employees.
@@ -44,7 +45,7 @@ data class EmployeesListItem(
 
     @field:SerializedName("photo_url_small")
     val photoUrlSmall: String,
-)
+) : Serializable
 
 /**
  * Enum class to display type of employment.

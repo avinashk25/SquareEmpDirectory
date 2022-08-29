@@ -12,7 +12,7 @@ import com.project.squareempdirectory.retrofit.model.EmployeesListItem
  * A RecyclerView.Adapter populating the screen with a list of employees fetched through viewModel using retrofit Http API.
  */
 
-class EmployeeListAdapter(var items: List<EmployeesListItem> = emptyList()) : RecyclerView.Adapter<EmployeeListViewHolder>(){
+class EmployeeListAdapter(var items: List<EmployeesListItem> = emptyList(), val adapterOnClick : (EmployeesListItem) -> Unit) : RecyclerView.Adapter<EmployeeListViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmployeeListViewHolder {
         val binding = EmployeeListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -21,6 +21,7 @@ class EmployeeListAdapter(var items: List<EmployeesListItem> = emptyList()) : Re
 
     override fun onBindViewHolder(holder: EmployeeListViewHolder, position: Int) {
         holder.binding.employeeDetails = items.elementAtOrNull(position)
+        holder.binding.cardView.setOnClickListener { adapterOnClick(items.elementAt(position)) }
     }
 
     override fun getItemCount(): Int {

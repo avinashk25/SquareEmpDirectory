@@ -12,10 +12,10 @@ import com.project.squareempdirectory.retrofit.model.EmployeesListItem
  * Binding methods added to update UI items from layout files.
  */
 
-@BindingAdapter("items")
-fun RecyclerView.addItems(items : List<EmployeesListItem>?) {
+@BindingAdapter("items" , "adapterOnClick")
+fun RecyclerView.addItems(items : List<EmployeesListItem>?, adapterOnClick : (EmployeesListItem) -> Unit) {
     if (adapter == null) {
-        val fragmentListAdapter = EmployeeListAdapter(items ?: emptyList())
+        val fragmentListAdapter = EmployeeListAdapter(items ?: emptyList(), adapterOnClick)
         adapter = fragmentListAdapter
         addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
     } else {
